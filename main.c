@@ -1,88 +1,130 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   main.c                                             :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: notraore <marvin@42.fr>                    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2019/05/15 15:30:46 by notraore          #+#    #+#             */
+/*   Updated: 2019/05/15 15:30:46 by notraore         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "md5.h"
 
-unsigned f_zero(unsigned b, unsigned c, unsigned d)
+void			mdf_allocation(const char *msg, int msglen, t_mdf *targ)
 {
-	return ((b & c) | (~b & d));
-}
-
-unsigned f_one(unsigned b, unsigned c, unsigned d)
-{
-	return ((d & b) | (~d & c));
-}
-
-unsigned f_two(unsigned b, unsigned c, unsigned d)
-{
-	return (b ^ c ^ d);
-}
-
-unsigned f_three(unsigned b, unsigned c, unsigned d)
-{
-	return (c ^ (b |~d));
-}
-
-double			my_pow(double x, int y)
-{
-	int		i;
-	double value;
-
-	i = 0;
-	value = 1;
-
-	if (y == 0)
-		return (1.0f);
-	else if (x == 0)
-		return (0.0f);
-	while (i < ABS(y))
+	targ->grps = 1 + (msglen + 8) / 64;
+	targ->msg2 = malloc(64 * targ->grps);
+	if (!targ->msg2)
+		ft_kill("Message malloc failed.");
+	memcpy(targ->msg2, msg, msglen);
+	targ->msg2[msglen] = (unsigned char)0x80;
+	targ->q = msglen + 1;
+	while (targ->q < 64 * targ->grps)
 	{
-		value *= x;
-		i++;
+		targ->msg2[targ->q] = 0;
+		targ->q++;
 	}
-	if (y < 0)
-		return (1.0f / value);
-	else
-		return value;
+	wbunion.w = 8 * msglen;
+	targ->q -= 8;
+	memcpy(targ->msg2 + targ->q, &wbunion.w, 4);
 }
 
-unsigned		*calc(unsigned *ks)
+void			mdf_loop(t_mdf *targ, short *rots[4])
 {
-	int		i;
-	double	s;
-	double	pwr;
-
-	i = 0;
-	pwr = my_pow(2, 32);
-	while (i < 64)
+	while (targ->p < 4)
 	{
-		s = fabs(sin(1 + i));
-		ks[i] = (unsigned)(s * pwr);
-		i++;
+		targ->fctn = targ->ff[targ->p];
+		targ->rotn = rots[targ->p];
+		targ->m = targ->mo[targ->p];
+		targ->o = targ->om[targ->p];
+		targ->q = 0;
+		while (targ->q < 16)
+		{
+			targ->g = (targ->m * targ->q + targ->o) % 16;
+			targ->f = targ->abcd[1] + rol(targ->abcd[0] +
+			targ->fctn(targ->abcd) + targ->k[targ->q + 16 * targ->p] +
+			mm.w[targ->g], targ->rotn[targ->q % 4]);
+			targ->abcd[0] = targ->abcd[3];
+			targ->abcd[3] = targ->abcd[2];
+			targ->abcd[2] = targ->abcd[1];
+			targ->abcd[1] = targ->f;
+			targ->q++;
+		}
+		targ->p++;
 	}
-	return (ks);
 }
 
-unsigned		rol(unsigned v, short amt)
+void			mdf_digest_msg(t_mdf *targ, short *rots[4])
 {
-	unsigned msk = (1 << amt) -1;
-	return (((v >> (32 - amt)) & msk) | ((v << amt) & ~msk));
+	while (targ->grp < targ->grps)
+	{
+		memcpy(mm.b, targ->msg2 + targ->os, 64);
+		targ->q = 0;
+		while (targ->q < 4)
+		{
+			targ->abcd[targ->q] = targ->h[targ->q];
+			targ->q++;
+		}
+		targ->p = 0;
+		mdf_loop(targ, rots);
+		targ->p = 0;
+		while (targ->p < 4)
+		{
+			targ->h[targ->p] += targ->abcd[targ->p];
+			targ->p++;
+		}
+		targ->os += 64;
+		targ->grp++;
+	}
 }
 
-unsigned		mdf(const char *msg, int msglen)
+unsigned		*mdf(const char *msg, int msglen, t_mdf *targ)
 {
-	typedef unsigned Digest[4];
-	(void)(msg);
-	(void)(msglen);
+	static short rot0[4] = {7, 12, 17, 22};
+	static short rot1[4] = {5, 9, 14, 20};
+	static short rot2[4] = {4, 11, 16, 23};
+	static short rot3[4] = {6, 10, 15, 21};
+	static short *rots[4] = {rot0, rot1, rot2, rot3};
 
-	static Digest h0 = {0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476};
-	printf("%d\n", h0[0]);
-	return (1);
+	if (targ->k == NULL)
+		targ->k = calc(targ->kspace);
+	while (targ->q < 4)
+	{
+		targ->h[targ->q] = targ->h0[targ->q];
+		targ->q++;
+	}
+	mdf_allocation(msg, msglen, targ);
+	mdf_digest_msg(targ, rots);
+	if (targ->msg2)
+		free(targ->msg2);
+	return (targ->h);
 }
 
-int main(void)
+int				main(void)
 {
-	char *line;
+	char		*line;
+	t_mdf		target;
+	unsigned	*ret;
+	char		*msg;
 
+	ft_bzero(&target, sizeof(t_mdf));
+	init_mdf(&target);
 	get_next_line(0, &line);
-	ft_putendl(line);
-	mdf("e", 1);
-	return 0;
+	msg = ft_strjoin(line, "\n");
+	ret = mdf(msg, strlen(msg), &target);
+	while (target.i < 4)
+	{
+		wbunion.w = ret[target.i];
+		while (target.j < 4)
+		{
+			printf("%02x", wbunion.b[target.j]);
+			target.j++;
+		}
+		target.i++;
+		target.j = 0;
+	}
+	printf("\n");
+	return (0);
 }

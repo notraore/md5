@@ -14,6 +14,8 @@ NAME		= 	hash
 LIBFT 		= 	libft/libft.a
 
 SRCS		= 	main.c \
+				digest.c \
+				utils.c
 
 OBJS		= 	$(patsubst srcs/%.c,objs/%.o,$(SRCS))
 
