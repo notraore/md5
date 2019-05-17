@@ -65,6 +65,7 @@ void			init_mdf(t_mdf *targ)
 	targ->h0[1] = 0xEFCDAB89;
 	targ->h0[2] = 0x98BADCFE;
 	targ->h0[3] = 0x10325476;
+
 	targ->ff[0] = &f_zero;
 	targ->ff[1] = &f_one;
 	targ->ff[2] = &f_two;
