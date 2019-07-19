@@ -14,8 +14,11 @@
 # define MD5_H
 # include <unistd.h>
 # include <stdlib.h>
+# include <fcntl.h>
+# include <errno.h>
 # include <stdio.h>
 # include <string.h>
+# include <stdint.h>
 # include "libft/libft.h"
 # define ABS(x) ((x < 0) ? (-x) : (x))
 
@@ -34,6 +37,15 @@ union
 typedef unsigned		digest[4];
 typedef unsigned int	(*dgstfctn)(unsigned a[]);
 typedef struct s_mdf	t_mdf;
+typedef struct s_sha256	t_sha256;
+
+
+struct s_sha256
+{
+	uint32_t		shastate[8];
+	unsigned		count[2];
+	unsigned char	buff[256];
+};
 
 struct					s_mdf
 {
@@ -66,7 +78,7 @@ struct					s_mdf
 	unsigned char		*msg2;
 
 };
-
+/****************************** MD5 ******************************/
 /*
 **digest.c
 */
@@ -76,11 +88,20 @@ unsigned				f_two(unsigned abcd[]);
 unsigned				f_three(unsigned abcd[]);
 
 /*
-** utils.c
+** md5.c
 */
 double					my_pow(double x, int y);
 unsigned				*calc(unsigned *ks);
 unsigned				rol(unsigned v, short amt);
 void					init_mdf(t_mdf *targ);
-
+unsigned				*mdf(const char *msg, int msglen, t_mdf *targ);
+/****************************** SHA256 ******************************/
+void				rev_endian32(uint32_t *src, const size_t len);
+void				rev_endian64(uint32_t *src, const size_t len);
+void				init_sha256(t_sha256 *sha);
+void				update(t_sha256 *sha);
+void				digest_sha256(t_sha256 *sha, char *msg, size_t len);
+void				digest_sha256_suite(t_sha256 *sha, unsigned char *hash);
+void				print_hash(t_sha256 *sha, unsigned char *hash);
+void				printstr_sha256(t_sha256 *sha, char *msg);
 #endif

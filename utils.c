@@ -59,6 +59,8 @@ unsigned		rol(unsigned v, short amt)
 	return (((v >> (32 - amt)) & msk) | ((v << amt) & ~msk));
 }
 
+
+
 void			init_mdf(t_mdf *targ)
 {
 	targ->h0[0] = 0x67452301;

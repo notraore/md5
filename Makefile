@@ -15,7 +15,9 @@ LIBFT 		= 	libft/libft.a
 
 SRCS		= 	main.c \
 				digest.c \
-				utils.c
+				utils.c \
+				md5.c \
+				sha256.c
 
 OBJS		= 	$(patsubst srcs/%.c,objs/%.o,$(SRCS))
 

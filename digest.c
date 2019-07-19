@@ -12,6 +12,7 @@
 
 #include "md5.h"
 
+/******************* MD5 *******************/
 unsigned		f_zero(unsigned abcd[])
 {
 	return ((abcd[1] & abcd[2]) | (~abcd[1] & abcd[3]));
