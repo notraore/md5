@@ -45,6 +45,7 @@ struct s_sha256
 	uint32_t		shastate[8];
 	unsigned		count[2];
 	unsigned char	buff[256];
+	char			line;
 };
 
 struct					s_mdf
@@ -97,11 +98,11 @@ void					init_mdf(t_mdf *targ);
 unsigned				*mdf(const char *msg, int msglen, t_mdf *targ);
 /****************************** SHA256 ******************************/
 void				rev_endian32(uint32_t *src, const size_t len);
-void				rev_endian64(uint32_t *src, const size_t len);
+void				rev_endian64(uint64_t *src, const size_t len);
 void				init_sha256(t_sha256 *sha);
 void				update(t_sha256 *sha);
 void				digest_sha256(t_sha256 *sha, char *msg, size_t len);
 void				digest_sha256_suite(t_sha256 *sha, unsigned char *hash);
-void				print_hash(t_sha256 *sha, unsigned char *hash);
+void				print_hash(unsigned char *hash);
 void				printstr_sha256(t_sha256 *sha, char *msg);
 #endif

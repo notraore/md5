@@ -12,6 +12,15 @@
 
 #include "md5.h"
 
+#define ROTL(x, n) (x << n) | (x >> (32 - n))
+#define ROTR(x, n) (((x) >> (n)) | ((x) << (32 - (n))))
+#define CH(e, f, g) (((e) & (f)) ^ (~(e) & (g)))
+#define MA(a, b, c) (((a) & (b)) ^ ((a) & (c)) ^ ((b) & (c)))
+#define SIGMA0(a) (ROTR(a, 2) ^ ROTR(a, 13) ^ ROTR(a, 22))
+#define SIGMA1(e) (ROTR(e, 6) ^ ROTR(e, 11) ^ ROTR(e, 25))
+#define SIG0(x) (ROTR(x, 7) ^ ROTR(x, 18) ^ (x >> 3))
+#define SIG1(x) (ROTR(x, 17) ^ ROTR(x, 19) ^ (x >> 10))
+
 static uint32_t const k[64] = {
 	0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1,
 	0x923f82a4, 0xab1c5ed5, 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
@@ -35,16 +44,15 @@ void				rev_endian32(uint32_t *src, const size_t len)
 	while (i < len)
 	{
 		n = src[i];
-		data = (unsigned char *)&src[i];
-		data[0] = (n >> 24) & 0xff;
-		data[1] = (n >> 16) & 0xff;
-		data[2] = (n >> 8) & 0xff;
+		data = (unsigned char *)&src[i++];
+		data[0] = ((n >> 24) & 0xff);
+		data[1] = ((n >> 16) & 0xff);
+		data[2] = ((n >> 8) & 0xff);
 		data[3] = (n & 0xff);
-		i++;
 	}
 }
 
-void				rev_endian64(uint32_t *src, const size_t len)
+void				rev_endian64(uint64_t *src, const size_t len)
 {
 	unsigned char		*data;
 	uint64_t			n;
@@ -54,16 +62,15 @@ void				rev_endian64(uint32_t *src, const size_t len)
 	while (i < len)
 	{
 		n = src[i];
-		data = (unsigned char *)&src[i];
-		data[0] = (n >> 56) & 0xff;
-		data[1] = (n >> 48) & 0xff;
-		data[2] = (n >> 40) & 0xff;
-		data[3] = (n >> 32) & 0xff;
-		data[4] = (n >> 24) & 0xff;
-		data[5] = (n >> 16) & 0xff;
-		data[6] = (n >> 8) & 0xff;
+		data = (unsigned char *)&src[i++];
+		data[0] = ((n >> 56) & 0xff);
+		data[1] = ((n >> 48) & 0xff);
+		data[2] = ((n >> 40) & 0xff);
+		data[3] = ((n >> 32) & 0xff);
+		data[4] = ((n >> 24) & 0xff);
+		data[5] = ((n >> 16) & 0xff);
+		data[6] = ((n >> 8) & 0xff);
 		data[7] = (n & 0xff);
-		i++;
 	}
 }
 
@@ -82,18 +89,6 @@ void				init_sha256(t_sha256 *sha)
 	sha->count[1] = 0;
 }
 
-#define ROTL(x, n) (x >> n) | (x << (32 - n))
-#define ROTR(x, n) (x >> n) | (x >> (32 - n))
-
-#define CH(e, f, g) ((e) & (f)) ^ ((~e) & (g))
-#define MA(a, b, c) ((a) & (b)) ^ ((a) ^ (c)) ^ ((b) & (c))
-
-#define SIGMA0(a) ROTR(a, 2) ^ ROTR(a, 13) ^ ROTR(a, 22)
-#define SIGMA1(e) ROTR(e, 6) ^ ROTR(e, 11) ^ ROTR(e, 25)
-
-#define SIG0(x) ROTR(x, 7) ^ ROTR(x, 18) ^ (x >> 3)
-#define SIG1(x) ROTR(x, 17) ^ ROTR(x, 19) ^ (x >> 10)
-
 static uint32_t			*padding(t_sha256 *sha)
 {
 	static uint32_t state[8];
@@ -103,10 +98,10 @@ static uint32_t			*padding(t_sha256 *sha)
 
 	i = 0;
 	ft_memcpy(state, sha->shastate, sizeof(state));
-	while (i < (512 / 8))
+	while (i < 64)
 	{
 		tmp1 = state[7] + SIGMA1(state[4]) + CH(state[4], state[5], state[6])
-		+ k[i] + ((uint32_t *)sha->buff)[i];
+			+ k[i] + ((uint32_t *)sha->buff)[i];
 		tmp2 = SIGMA0(state[0]) + MA(state[0], state[1], state[2]);
 		state[7] = state[6];
 		state[6] = state[5];
@@ -132,8 +127,8 @@ void		update(t_sha256 *sha)
 	rev_endian32(buffer, 16);
 	while (i < 64)
 	{
-		sha->buff[i] = sha->buff[i - 16] + SIG0(sha->buff[i - 15]) + sha->buff[i - 7]
-		+ SIG1(sha->buff[i - 2]);
+		buffer[i] = buffer[i - 16] + SIG0(buffer[i - 15]) + buffer[i - 7]
+		+ SIG1(buffer[i - 2]);
 		i++;
 	}
 	pad_rest = padding(sha);
@@ -152,6 +147,7 @@ void		update(t_sha256 *sha)
 void			digest_sha256(t_sha256 *sha, char *msg, size_t len)
 {
 	uint32_t		bits;
+
 	while (len)
 	{
 		bits = sha->count[0] >> 3;
@@ -161,7 +157,7 @@ void			digest_sha256(t_sha256 *sha, char *msg, size_t len)
 			sha->count[0] += len << 3;
 			return ;
 		}
-		ft_memcpy(sha->buff + bits, msg, len);
+		ft_memcpy(sha->buff + bits, msg, 64 - bits);
 		sha->count[0] = 0;
 		++sha->count[1];
 		update(sha);
@@ -173,7 +169,7 @@ void			digest_sha256(t_sha256 *sha, char *msg, size_t len)
 void			digest_sha256_suite(t_sha256 *sha, unsigned char *hash)
 {
 	uint32_t		bits;
-	uint32_t		size;
+	uint64_t		size;
 	size_t			i;
 
 	i = 0;
@@ -193,27 +189,31 @@ void			digest_sha256_suite(t_sha256 *sha, unsigned char *hash)
 	rev_endian32((uint32_t *)hash, 8);
 }
 
-void			print_hash(t_sha256 *sha, unsigned char *hash)
+void			print_hash(unsigned char *hash)
 {
-	// char		line[65];
-	int			i;
-	(void)sha;
+	int						g;
+	size_t					i;
+	const unsigned char		*pc;
 
-	i = 0;
-	while (i < 32)
+	pc = hash;
+	for (i = 0; i < 32; ++i)
 	{
-		printf("%.2x", hash[i]);
-		i++;
+		g = (*(pc + i) >> 4) & 0xf;
+		g += g >= 10 ? 'a' - 10 : '0';
+		ft_putchar(g);
+		g = *(pc + i) & 0xf;
+		g += g >= 10 ? 'a' - 10 : '0';
+		ft_putchar(g);
 	}
-	// printf("%s\n", hash);
-	printf("\n");
+	ft_putchar('\n');
 }
 
 void			printstr_sha256(t_sha256 *sha, char *msg)
 {
 	unsigned char hash[32];
 
+	init_sha256(sha);
 	digest_sha256(sha, msg, ft_strlen(msg));
 	digest_sha256_suite(sha, hash);
-	print_hash(sha, hash);
+	print_hash(hash);
 }

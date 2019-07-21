@@ -37,6 +37,7 @@ int				main(int argc, char **argv)
 	// }
 	// printf("\n");
 	t_sha256 sha;
+
 	if (argc == 2)
 		printstr_sha256(&sha, argv[1]);
 	return (0);

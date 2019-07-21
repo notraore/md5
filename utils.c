@@ -41,7 +41,7 @@ unsigned		*calc(unsigned *ks)
 	double	pwr;
 
 	i = 0;
-	pwr = my_pow(2, 32);
+	pwr = pow(2, 32);
 	while (i < 64)
 	{
 		s = fabs(sin(1 + i));
