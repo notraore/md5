@@ -144,7 +144,7 @@ void		update(t_sha256 *sha)
 
 }
 
-void			digest_sha256(t_sha256 *sha, char *msg, size_t len)
+void			digest_sha256(t_sha256 *sha, unsigned char const *msg, size_t len)
 {
 	uint32_t		bits;
 
@@ -208,12 +208,18 @@ void			print_hash(unsigned char *hash)
 	ft_putchar('\n');
 }
 
-void			printstr_sha256(t_sha256 *sha, char *msg)
+// void			printfile_sha256(t_sha256 *sha)
+// {
+
+// }
+
+
+void			printstr_sha256(t_sha256 *sha, unsigned const char *msg)
 {
 	unsigned char hash[32];
 
 	init_sha256(sha);
-	digest_sha256(sha, msg, ft_strlen(msg));
+	digest_sha256(sha, msg, ft_strlen((char *)msg));
 	digest_sha256_suite(sha, hash);
 	print_hash(hash);
 }

@@ -24,7 +24,7 @@
 
 union
 {
-	unsigned			w;
+	unsigned char			w;
 	unsigned char		b[4];
 }						wbunion;
 
@@ -38,7 +38,15 @@ typedef unsigned		digest[4];
 typedef unsigned int	(*dgstfctn)(unsigned a[]);
 typedef struct s_mdf	t_mdf;
 typedef struct s_sha256	t_sha256;
+typedef struct s_mode	t_mode;
 
+struct				s_mode
+{
+	bool			p;
+	bool			q;
+	bool			r;
+	bool			s;
+};
 
 struct s_sha256
 {
@@ -101,8 +109,8 @@ void				rev_endian32(uint32_t *src, const size_t len);
 void				rev_endian64(uint64_t *src, const size_t len);
 void				init_sha256(t_sha256 *sha);
 void				update(t_sha256 *sha);
-void				digest_sha256(t_sha256 *sha, char *msg, size_t len);
+void				digest_sha256(t_sha256 *sha, unsigned char const *msg, size_t len);
 void				digest_sha256_suite(t_sha256 *sha, unsigned char *hash);
 void				print_hash(unsigned char *hash);
-void				printstr_sha256(t_sha256 *sha, char *msg);
+void				printstr_sha256(t_sha256 *sha, unsigned const char *msg);
 #endif
