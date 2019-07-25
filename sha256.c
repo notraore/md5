@@ -12,8 +12,6 @@
 
 #include "md5.h"
 
-#define ROTL(x, n) (x << n) | (x >> (32 - n))
-#define ROTR(x, n) (((x) >> (n)) | ((x) << (32 - (n))))
 #define CH(e, f, g) (((e) & (f)) ^ (~(e) & (g)))
 #define MA(a, b, c) (((a) & (b)) ^ ((a) & (c)) ^ ((b) & (c)))
 #define SIGMA0(a) (ROTR(a, 2) ^ ROTR(a, 13) ^ ROTR(a, 22))
@@ -184,19 +182,20 @@ void			digest_sha256_suite(t_sha256 *sha, unsigned char *hash)
 	while (i < 32)
 	{
 		hash[i] = ((unsigned char *)sha->shastate)[i];
-		i++;
+		++i;
 	}
 	rev_endian32((uint32_t *)hash, 8);
 }
 
-void			print_hash(unsigned char *hash)
+void			print_hash(unsigned char *hash, int count)
 {
 	int						g;
 	size_t					i;
 	const unsigned char		*pc;
 
 	pc = hash;
-	for (i = 0; i < 32; ++i)
+	i = 0;
+	while (i < count)
 	{
 		g = (*(pc + i) >> 4) & 0xf;
 		g += g >= 10 ? 'a' - 10 : '0';
@@ -204,15 +203,10 @@ void			print_hash(unsigned char *hash)
 		g = *(pc + i) & 0xf;
 		g += g >= 10 ? 'a' - 10 : '0';
 		ft_putchar(g);
+		i++;
 	}
 	ft_putchar('\n');
 }
-
-// void			printfile_sha256(t_sha256 *sha)
-// {
-
-// }
-
 
 void			printstr_sha256(t_sha256 *sha, unsigned const char *msg)
 {
@@ -221,5 +215,15 @@ void			printstr_sha256(t_sha256 *sha, unsigned const char *msg)
 	init_sha256(sha);
 	digest_sha256(sha, msg, ft_strlen((char *)msg));
 	digest_sha256_suite(sha, hash);
-	print_hash(hash);
+	print_hash(hash, 32);
+}
+
+void			printstr_md5(t_md5 *md5, unsigned const char *msg)
+{
+	unsigned char hash[32];
+
+	init_md5(md5);
+	digest(md5, msg, ft_strlen((char *)msg));
+	digest_suite(md5, hash, 16);
+	print_hash(hash, 16);
 }

@@ -21,23 +21,12 @@
 # include <stdint.h>
 # include "libft/libft.h"
 # define ABS(x) ((x < 0) ? (-x) : (x))
+#define ROTL(x, c)	(((x) << (c)) | ((x) >> (32 - (c))))
+#define ROTR(x, n)	(((x) >> (n)) | ((x) << (32 - (n))))
 
-union
-{
-	unsigned char			w;
-	unsigned char		b[4];
-}						wbunion;
 
-union
-{
-	unsigned			w[16];
-	char				b[64];
-}						mm;
-
-typedef unsigned		digest[4];
-typedef unsigned int	(*dgstfctn)(unsigned a[]);
-typedef struct s_mdf	t_mdf;
 typedef struct s_sha256	t_sha256;
+typedef struct s_md5	t_md5;
 typedef struct s_mode	t_mode;
 
 struct				s_mode
@@ -46,6 +35,8 @@ struct				s_mode
 	bool			q;
 	bool			r;
 	bool			s;
+	bool			md5;
+	bool			sha;
 };
 
 struct s_sha256
@@ -53,57 +44,23 @@ struct s_sha256
 	uint32_t		shastate[8];
 	unsigned		count[2];
 	unsigned char	buff[256];
-	char			line;
 };
 
-struct					s_mdf
+struct s_md5
 {
-	digest				h0;
-	dgstfctn			ff[4];
-	short				mo[4];
-	short				om[4];
-	short				rot0[4];
-	short				rot1[4];
-	short				rot2[4];
-	short				rot3[4];
-	short				*rots[4];
-	unsigned			kspace[64];
-	unsigned			*k;
-	digest				h;
-	digest				abcd;
-	dgstfctn			fctn;
-	short				m;
-	short				o;
-	short				g;
-	unsigned			f;
-	short				*rotn;
-	int					os;
-	int					grp;
-	int					grps;
-	int					q;
-	int					p;
-	int					i;
-	int					j;
-	unsigned char		*msg2;
-
+	uint32_t		mdstate[4];
+	unsigned		count[2];
+	unsigned char	buff[64];
 };
 /****************************** MD5 ******************************/
 /*
 **digest.c
 */
-unsigned				f_zero(unsigned abcd[]);
-unsigned				f_one(unsigned abcd[]);
-unsigned				f_two(unsigned abcd[]);
-unsigned				f_three(unsigned abcd[]);
-
-/*
-** md5.c
-*/
-double					my_pow(double x, int y);
-unsigned				*calc(unsigned *ks);
-unsigned				rol(unsigned v, short amt);
-void					init_mdf(t_mdf *targ);
-unsigned				*mdf(const char *msg, int msglen, t_mdf *targ);
+void				init_md5(t_md5 *md5);
+void				digest(t_md5 *md5, unsigned char const *msg, size_t len);
+void				digest_suite(t_md5 *md5, unsigned char *hash, size_t count);
+void				printstr_md5(t_md5 *md5, unsigned const char *msg);
+void				crypt_filesha(t_sha256 *sha, char const *target, t_mode *mode);
 /****************************** SHA256 ******************************/
 void				rev_endian32(uint32_t *src, const size_t len);
 void				rev_endian64(uint64_t *src, const size_t len);
@@ -111,6 +68,7 @@ void				init_sha256(t_sha256 *sha);
 void				update(t_sha256 *sha);
 void				digest_sha256(t_sha256 *sha, unsigned char const *msg, size_t len);
 void				digest_sha256_suite(t_sha256 *sha, unsigned char *hash);
-void				print_hash(unsigned char *hash);
+void				print_hash(unsigned char *hash, int count);
 void				printstr_sha256(t_sha256 *sha, unsigned const char *msg);
+void				crypt_filemd5(t_md5 *md5, char const *target, t_mode *mode);
 #endif

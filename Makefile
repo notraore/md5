@@ -22,7 +22,7 @@ SRCS		= 	main.c \
 OBJS		= 	$(patsubst srcs/%.c,objs/%.o,$(SRCS))
 
 CC			= 	gcc
-CFLAGS		= 	-Wall -Wextra -Werror
+CFLAGS		= 	
 
 CG = \033[92m
 CY = \033[93m
