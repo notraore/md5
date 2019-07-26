@@ -37,6 +37,7 @@ struct				s_mode
 	bool			s;
 	bool			md5;
 	bool			sha;
+	bool			pipe;
 };
 
 struct s_sha256
@@ -70,5 +71,5 @@ void				digest_sha256(t_sha256 *sha, unsigned char const *msg, size_t len);
 void				digest_sha256_suite(t_sha256 *sha, unsigned char *hash);
 void				print_hash(unsigned char *hash, int count);
 void				printstr_sha256(t_sha256 *sha, unsigned const char *msg);
-void				crypt_filemd5(t_md5 *md5, char const *target, t_mode *mode);
+// void				crypt_filemd5(t_md5 *md5, char const *target, t_mode *mode);
 #endif

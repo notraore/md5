@@ -24,21 +24,6 @@ void		 print_help(void)
 	ft_kill("-s -> print the sum of the output.");
 }
 
-void			check_mode(char *line, t_mode *mode)
-{
-	if (line[0] == '-' && line[1] == 'p' && !line[2])
-		mode->p = true;
-	if (line[0] == '-' && line[1] == 'q' && !line[2])
-		mode->q = true;
-	if (line[0] == '-' && line[1] == 'r' && !line[2])
-		mode->r = true;
-	if (line[0] == '-' && line[1] == 's' && !line[2])
-	{
-		printf("fegnjer\n");
-		mode->s = true;
-	}
-}
-
 void			check_hashmethod(char *args, t_mode *mode)
 {
 	if (ft_strcmp(args, "md5") == 0)
@@ -68,7 +53,7 @@ void			crypt_filemd5(t_md5 *md5, char const *target, t_mode *mode)
 	while ((bits = read(fd, buffer, 1)) > 0)
 	{
 		digest(md5, buffer, bits);
-		if (fd == 0 && (mode->q == false && mode->r == false))
+		if (fd == 0 && (mode->q == false))
 			write(1, buffer, bits);
 	}
 	if (fd)
@@ -129,12 +114,19 @@ void			normal_print(t_sha256 *sha, t_mode *mode, char *argv)
 	}
 }
 
+void			display_md5(t_mode *mode, t_md5 *md5)
+{
+	if (mode->pipe == true)
+		crypt_filemd5(md5, NULL, mode);
+}
+
 int				main(int argc, char **argv)
 {
 	t_sha256	sha;
 	t_md5		md5;
 	t_mode		mode;
 	int			i;
+	int			option;
 
 
 	i = 0;
@@ -144,15 +136,32 @@ int				main(int argc, char **argv)
 
 	check_argc(argc);
 	while (i < argc)
+		check_hashmethod(argv[i++], &mode);
+
+	while ((option = getopt(argc, argv, "-pqrs")) != -1)
 	{
-		check_hashmethod(argv[i], &mode);
-		check_mode(argv[i], &mode);
-		i++;
+		if (option == 'p')
+			mode.p = true;
+		else if (option == 'q')
+			mode.q = true;
+		else if (option == 'r')
+			mode.r = true;
+		else if (option == 's')
+			mode.s = true;
 	}
-	if ((mode.md5 && mode.s) && argc == 3)
-		printstr_md5(&md5, (unsigned const char *)argv[argc - 1]);
-	else if (mode.md5 && argc == 2)
-		crypt_filemd5(&md5, NULL, &mode);
+	if (!isatty(fileno(stdin)))
+	{
+		ft_putendl("Avec ECHO");
+		mode.pipe = true;
+	}
+	if (mode.md5 == true)
+		display_md5(&mode, &md5);
+	// else
+		// ft_putendl("Sans ECHO");
+	// if ((mode.md5 && mode.s) && argc >= 3)
+	// 	printstr_md5(&md5, (unsigned const char *)argv[argc - 1]);
+	// else if (mode.md5 && argc == 2)
+		// crypt_filemd5(&md5, NULL, &mode);
 	/* sha to finish now */
 	// printstr_sha256(&sha, (unsigned const char *)argv[1]);
 	// crypt_filesha(&sha, NULL, &mode);
