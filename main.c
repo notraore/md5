@@ -153,6 +153,7 @@ int				main(int argc, char **argv)
 		printstr_md5(&md5, (unsigned const char *)argv[argc - 1]);
 	else if (mode.md5 && argc == 2)
 		crypt_filemd5(&md5, NULL, &mode);
+	/* sha to finish */
 	// printstr_sha256(&sha, (unsigned const char *)argv[1]);
 	// crypt_filesha(&sha, NULL, &mode);
 	return (0);
