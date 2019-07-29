@@ -38,6 +38,7 @@ struct				s_mode
 	bool			md5;
 	bool			sha;
 	bool			pipe;
+	bool			file;
 };
 
 struct s_sha256
