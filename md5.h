@@ -48,6 +48,13 @@ struct s_sha256
 	unsigned char	buff[256];
 };
 
+struct s_sha512
+{
+	uint32_t		shastate[8];
+	unsigned		count[2];
+	unsigned char	buff[256];
+};
+
 struct s_md5
 {
 	uint32_t		mdstate[4];
