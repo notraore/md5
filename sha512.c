@@ -12,8 +12,6 @@
 
 #include "md5.h"
 
-#define CH(e, f, g) (((e) & (f)) ^ (~(e) & (g)))
-#define MA(a, b, c) (((a) & (b)) ^ ((a) & (c)) ^ ((b) & (c)))
 #define SI0(a) (ROTR(a, 28) ^ ROTR(a, 34) ^ ROTR(a, 39))
 #define SI1(e) (ROTR(e, 14) ^ ROTR(e, 18) ^ ROTR(e, 41))
 #define SUM0(x) (ROTR(x, 1) ^ ROTR(x, 8) ^ (x >> 7))
@@ -77,23 +75,23 @@ void				rev_endian64(uint64_t *src, const size_t len)
 	}
 }
 
-void				init_sha256(t_sha512 *sha)
+void				init_sha256(t_sha512 *tar)
 {
-	sha->shastate[0] = 0x6a09e667f3bcc908;
-	sha->shastate[1] = 0xbb67ae8584caa73b;
-	sha->shastate[2] = 0x3c6ef372fe94f82b;
-	sha->shastate[3] = 0xa54ff53a5f1d36f1;
+	tar->shastate[0] = 0x6a09e667f3bcc908;
+	tar->shastate[1] = 0xbb67ae8584caa73b;
+	tar->shastate[2] = 0x3c6ef372fe94f82b;
+	tar->shastate[3] = 0xa54ff53a5f1d36f1;
 
-	sha->shastate[4] = 0x510e527fade682d1;
-	sha->shastate[5] = 0x9b05688c2b3e6c1f;
-	sha->shastate[6] = 0x1f83d9abfb41bd6b;
-	sha->shastate[7] = 0x5be0cd19137e2179;
+	tar->shastate[4] = 0x510e527fade682d1;
+	tar->shastate[5] = 0x9b05688c2b3e6c1f;
+	tar->shastate[6] = 0x1f83d9abfb41bd6b;
+	tar->shastate[7] = 0x5be0cd19137e2179;
 
-	sha->count[0] = 0;
-	sha->count[1] = 0;
+	tar->count[0] = 0;
+	tar->count[1] = 0;
 }
 
-static uint32_t			*padding(t_sha512 *sha)
+static uint32_t			*padding(t_sha512 *tar)
 {
 	static uint32_t state[8];
 	uint32_t		tmp1;
@@ -101,11 +99,11 @@ static uint32_t			*padding(t_sha512 *sha)
 	int				i;
 
 	i = 0;
-	ft_memcpy(state, sha->shastate, sizeof(state));
+	ft_memcpy(state, tar->shastate, sizeof(state));
 	while (i < 64)
 	{
 		tmp1 = state[7] + SI1(state[4]) + CH(state[4], state[5], state[6])
-			+ k[i] + ((uint32_t *)sha->buff)[i];
+			+ k[i] + ((uint32_t *)tar->buff)[i];
 		tmp2 = SI0(state[0]) + MA(state[0], state[1], state[2]);
 		state[7] = state[6];
 		state[6] = state[5];
@@ -120,14 +118,14 @@ static uint32_t			*padding(t_sha512 *sha)
 	return (state);
 }
 
-void		update(t_sha512 *sha)
+void		update(t_sha512 *tar)
 {
 	uint32_t		*pad_rest;
 	uint32_t		*buffer;
 	size_t			i;
 
 	i = 16;
-	buffer = (uint32_t *)sha->buff;
+	buffer = (uint32_t *)tar->buff;
 	rev_endian32(buffer, 16);
 	while (i < 64)
 	{
@@ -135,59 +133,59 @@ void		update(t_sha512 *sha)
 		+ SUM1(buffer[i - 2]);
 		i++;
 	}
-	pad_rest = padding(sha);
-	sha->shastate[0] += pad_rest[0];
-	sha->shastate[1] += pad_rest[1];
-	sha->shastate[2] += pad_rest[2];
-	sha->shastate[3] += pad_rest[3];
-	sha->shastate[4] += pad_rest[4];
-	sha->shastate[5] += pad_rest[5];
-	sha->shastate[6] += pad_rest[6];
-	sha->shastate[7] += pad_rest[7];
-	ft_memset(sha->buff, 0, 64);
+	pad_rest = padding(tar);
+	tar->shastate[0] += pad_rest[0];
+	tar->shastate[1] += pad_rest[1];
+	tar->shastate[2] += pad_rest[2];
+	tar->shastate[3] += pad_rest[3];
+	tar->shastate[4] += pad_rest[4];
+	tar->shastate[5] += pad_rest[5];
+	tar->shastate[6] += pad_rest[6];
+	tar->shastate[7] += pad_rest[7];
+	ft_memset(tar->buff, 0, 64);
 
 }
 
-void			digest_sha256(t_sha512 *sha, unsigned char const *msg, size_t len)
+void			digest_sha256(t_sha512 *tar, unsigned char const *msg, size_t len)
 {
 	uint32_t		bits;
 
 	while (len)
 	{
-		bits = sha->count[0] >> 3;
+		bits = tar->count[0] >> 3;
 		if (bits + len < 64)
 		{
-			ft_memcpy(sha->buff + bits, msg, len);
-			sha->count[0] += len << 3;
+			ft_memcpy(tar->buff + bits, msg, len);
+			tar->count[0] += len << 3;
 			return ;
 		}
-		ft_memcpy(sha->buff + bits, msg, 64 - bits);
-		sha->count[0] = 0;
-		++sha->count[1];
-		update(sha);
+		ft_memcpy(tar->buff + bits, msg, 64 - bits);
+		tar->count[0] = 0;
+		++tar->count[1];
+		update(tar);
 		msg += 64 - bits;
 		len -= 64 - bits;
 	}
 }
 
-void			digest_sha256_suite(t_sha512 *sha, unsigned char *hash)
+void			digest_sha256_suite(t_sha512 *tar, unsigned char *hash)
 {
 	uint32_t		bits;
 	uint64_t		size;
 	size_t			i;
 
 	i = 0;
-	bits = sha->count[0] >> 3;
-	sha->buff[bits] = 0x80;
+	bits = tar->count[0] >> 3;
+	tar->buff[bits] = 0x80;
 	if (bits + sizeof(uint32_t) > 64)
-		update(sha);
-	size = ((size_t)sha->count[1] << 9) + sha->count[0];
+		update(tar);
+	size = ((size_t)tar->count[1] << 9) + tar->count[0];
 	rev_endian64(&size, 1);
-	ft_memcpy(sha->buff + (64 - sizeof(uint64_t)), &size, sizeof(uint64_t));
-	update(sha);
+	ft_memcpy(tar->buff + (64 - sizeof(uint64_t)), &size, sizeof(uint64_t));
+	update(tar);
 	while (i < 128)
 	{
-		hash[i] = ((unsigned char *)sha->shastate)[i];
+		hash[i] = ((unsigned char *)tar->shastate)[i];
 		++i;
 	}
 	rev_endian32((uint32_t *)hash, 8);
@@ -214,13 +212,13 @@ void			print_hash(unsigned char *hash, int count)
 	ft_putchar('\n');
 }
 
-void			printstr_sha256(t_sha512 *sha, unsigned const char *msg)
+void			printstr_sha256(t_sha512 *tar, unsigned const char *msg)
 {
 	unsigned char hash[128];
 
-	init_sha256(sha);
-	digest_sha256(sha, msg, ft_strlen((char *)msg));
-	digest_sha256_suite(sha, hash);
+	init_sha256(tar);
+	digest_sha256(tar, msg, ft_strlen((char *)msg));
+	digest_sha256_suite(tar, hash);
 	print_hash(hash, 128);
 }
 

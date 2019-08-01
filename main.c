@@ -37,7 +37,7 @@ void			check_hashmethod(char *args, t_mode *mode)
 	}
 	else
 	{
-		ft_putendl("unknown hash type");
+		ft_putendl("[Unknown hash type]");
 		print_help();
 	}
 
@@ -59,7 +59,7 @@ void			print_cript(t_md5 *md5, char const *target, t_mode *mode)
 {
 	if (target && !mode->r && !mode->q)
 	{
-		ft_putstr("MD5 (");
+		ft_putstr("(");
 		ft_putstr(target);
 		ft_putstr(") = ");
 	}
@@ -67,23 +67,9 @@ void			print_cript(t_md5 *md5, char const *target, t_mode *mode)
 	{
 		ft_putstr(" = (");
 		ft_putstr(target);
-		ft_putendl(") MD5");
-	}
-}
-
-void			sha_print_cript(t_sha256 *sha, char const *target, t_mode *mode)
-{
-	if (target && !mode->r && !mode->q)
-	{
-		ft_putstr("SHA256 (");
-		ft_putstr(target);
-		ft_putstr(") = ");
-	}
-	else if (target && !mode->q)
-	{
-		ft_putstr(" = (");
-		ft_putstr(target);
-		ft_putendl(") SHA256");
+		ft_putstr(")");
+		if (mode->r)
+			ft_putchar('\n');
 	}
 }
 
@@ -99,20 +85,38 @@ void			crypt_filemd5(t_md5 *md5, char const *target, t_mode *mode)
 	else if ((fd = open(target, O_RDONLY)) == -1)
 		ft_kill("Coulnd't open file.");
 	init_md5(md5);
+	if (!mode->q && !mode->r && !mode->pipe)
+		ft_putstr("MD5 ");
 	if (!mode->r)
 		print_cript(md5, target, mode);
 	while ((bits = read(fd, buffer, 1)) > 0)
 	{
 		digest(md5, buffer, bits);
-		if (fd == 0 && (mode->q == false && mode->p == true))
+		if (fd == 0 && (mode->p == true))
 			write(1, buffer, bits);
 	}
 	if (fd)
 		close(fd);
 	digest_suite(md5, hash, 16);
-	print_hash(hash, 16);
+	print_hash(hash, 16, mode);
 	if (mode->r)
 		print_cript(md5, target, mode);
+}
+
+void			sha_print_cript(t_sha256 *sha, char const *target, t_mode *mode)
+{
+	if (target && !mode->r && !mode->q)
+	{
+		ft_putstr("(");
+		ft_putstr(target);
+		ft_putstr(") = ");
+	}
+	else if (target && !mode->q)
+	{
+		ft_putstr(" = (");
+		ft_putstr(target);
+		ft_putendl(")");
+	}
 }
 
 void			crypt_filesha(t_sha256 *sha, char const *target, t_mode *mode)
@@ -127,18 +131,20 @@ void			crypt_filesha(t_sha256 *sha, char const *target, t_mode *mode)
 	else if ((fd = open(target, O_RDONLY)) == -1)
 		ft_kill("Coulnd't open file.");
 	init_sha256(sha);
+	if (!mode->q && !mode->r && !mode->pipe)
+		ft_putstr("SHA256 ");
 	if (!mode->r)
 		sha_print_cript(sha, target, mode);
 	while ((bits = read(fd, buffer, 1)) > 0)
 	{
 		digest_sha256(sha, buffer, bits);
-		if (fd == 0 && (mode->q == false && mode->p == true))
+		if (fd == 0 && (mode->p == true))
 			write(1, buffer, bits);
 	}
 	if (fd)
 		close(fd);
 	digest_sha256_suite(sha, hash);
-	print_hash(hash, 32);
+	print_hash(hash, 32, mode);
 	if (mode->r)
 		sha_print_cript(sha, target, mode);
 }
@@ -148,7 +154,7 @@ void			check_mode_md5(t_md5 *md5, char **line, char argc, t_mode *mode)
 	int i;
 	int fd;
 
-	i = 0;
+	i = -1;
 	fd = open(line[argc - 1], O_RDONLY);
 	if (fd != -1)
 	{
@@ -157,7 +163,7 @@ void			check_mode_md5(t_md5 *md5, char **line, char argc, t_mode *mode)
 		else
 			mode->file = true;
 	}
-	while (i < argc)
+	while (++i < argc)
 	{
 		if (line[i][0] == '-' && line[i][1] == 'p' && !line[i][2])
 			mode->p = true;
@@ -167,8 +173,10 @@ void			check_mode_md5(t_md5 *md5, char **line, char argc, t_mode *mode)
 			mode->r = true;
 		else if (line[i][0] == '-' && line[i][1] == 's' && !line[i][2])
 			mode->s = true;
-		i++;
 	}
+	// if (fd == -1 && !mode->s)
+	// 	print_help();
+
 }
 
 void			check_mode_sha(t_sha256 *sha, char **line, char argc, t_mode *mode)
@@ -176,7 +184,7 @@ void			check_mode_sha(t_sha256 *sha, char **line, char argc, t_mode *mode)
 	int i;
 	int fd;
 
-	i = 0;
+	i = -1;
 	fd = open(line[argc - 1], O_RDONLY);
 	if (fd != -1)
 	{
@@ -185,7 +193,7 @@ void			check_mode_sha(t_sha256 *sha, char **line, char argc, t_mode *mode)
 		else
 			mode->file = true;
 	}
-	while (i < argc)
+	while (++i < argc)
 	{
 		if (line[i][0] == '-' && line[i][1] == 'p' && !line[i][2])
 			mode->p = true;
@@ -195,88 +203,131 @@ void			check_mode_sha(t_sha256 *sha, char **line, char argc, t_mode *mode)
 			mode->r = true;
 		else if (line[i][0] == '-' && line[i][1] == 's' && !line[i][2])
 			mode->s = true;
-		i++;
 	}
+	// if (fd == -1 && mode->s == false)
+	// 	print_help();
 }
 
 void			normal_sha(t_sha256 *sha, t_mode *mode, char *argv)
 {
+	if (!mode->q)
+		ft_putstr("SHA256 ");
 	if (mode->q == false && mode->r == false)
 	{
-		ft_putstr("SHA256 (\"");
+		ft_putstr("(\"");
 		ft_putstr(argv);
 		ft_putstr("\") = ");
 	}
-	printstr_sha256(sha, (unsigned const char *)argv);
+	printstr_sha256(sha, (unsigned const char *)argv, mode);
 	if (mode->q == false && mode->r == true)
 	{
 		ft_putstr(" = (\"");
 		ft_putstr(argv);
-		ft_putendl("\") SHA256");
+		ft_putendl("\")");
 	}
 }
 
 void			normal_md5(t_md5 *md5, t_mode *mode, char *argv)
 {
+	if (!mode->q)
+		ft_putstr("MD5 ");
 	if (mode->q == false && mode->r == false)
 	{
-		ft_putstr("MD5 (\"");
+		ft_putstr("(\"");
 		ft_putstr(argv);
 		ft_putstr("\") = ");
 	}
-	printstr_md5(md5, (unsigned const char *)argv);
+	printstr_md5(md5, (unsigned const char *)argv, mode);
 	if (mode->q == false && mode->r == true)
 	{
 		ft_putstr(" = (\"");
 		ft_putstr(argv);
-		ft_putendl("\") MD5");
+		ft_putendl("\")");
 	}
 }
 
 void			display_md5(t_md5 *md5, t_mode *mode, int argc, char **argv)
 {
 	if (mode->pipe)
+	{
 		crypt_filemd5(md5, NULL, mode);
-	// if (mode->file)
-	// 	crypt_filemd5(md5, argv[argc - 1], mode);
-	// if (mode->file && mode->s)
-	// 	normal_md5(md5, mode, argv[argc - 2]);
-	// else if (!mode->file && mode->s)
-	// 	normal_md5(md5, mode, argv[argc - 1]);
+		if (mode->r)
+			ft_putchar('\n');
+	}
+	if (mode->file)
+	{
+		crypt_filemd5(md5, argv[argc - 1], mode);
+		if (!mode->pipe)
+			ft_putchar('\n');
+	}
+	if (mode->file && mode->s)
+	{
+		normal_md5(md5, mode, argv[argc - 2]);
+		if (mode->r)
+			ft_putchar('\n');
+	}
+	else if (!mode->file && mode->s)
+	{
+		normal_md5(md5, mode, argv[argc - 1]);
+		ft_putchar('\n');
+	}
+	if (mode->r)
+		ft_putchar('\n');
 }
 
 void			display_sha(t_sha256 *sha, t_mode *mode, int argc, char **argv)
 {
 	if (mode->pipe)
+	{
 		crypt_filesha(sha, NULL, mode);
-	// if (mode->file)
-	// 	crypt_filesha(sha, argv[argc - 1], mode);
-	// if (mode->file && mode->s)
-	// 	normal_sha(sha, mode, argv[argc - 2]);
-	// else if (!mode->file && mode->s)
-	// 	normal_sha(sha, mode, argv[argc - 1]);
+		if (mode->r)
+			ft_putchar('\n');
+	}
+	if (mode->file)
+	{
+		crypt_filesha(sha, argv[argc - 1], mode);
+		if (!mode->pipe && mode->r)
+			ft_putchar('\n');
+	}
+	if (mode->file && mode->s)
+	{
+		normal_sha(sha, mode, argv[argc - 2]);
+		if (mode->r)
+			ft_putchar('\n');
+	}
+	else if (!mode->file && mode->s)
+	{
+		normal_sha(sha, mode, argv[argc - 1]);
+		ft_putchar('\n');
+	}
+	if (mode->r)
+		ft_putchar('\n');
 }
 
 
 int				main(int argc, char **argv)
 {
-	t_sha256	sha;
 	t_md5		md5;
+	t_sha256	sha;
 	t_mode		mode;
 
-	ft_bzero(&sha, sizeof(t_sha256));
-	ft_bzero(&mode, sizeof(t_mode));
 	ft_bzero(&md5, sizeof(t_md5));
+	ft_bzero(&mode, sizeof(t_mode));
+	ft_bzero(&sha, sizeof(t_sha256));
 
 	if (!isatty(fileno(stdin)))
 		mode.pipe = true;
 	check_argc(argc, &mode);
 	check_hashmethod(argv[1], &mode);
-	check_mode_md5(&md5, argv, argc, &mode);
-	check_mode_sha(&sha, argv, argc, &mode);
-	// if (mode.md5 == true)
-		// display_md5(&md5, &mode, argc, argv);
-	// if (mode.sha == true)
+	if (mode.md5 == true)
+	{
+		check_mode_md5(&md5, argv, argc, &mode);
+		display_md5(&md5, &mode, argc, argv);
+	}
+	if (mode.sha == true)
+	{
+		check_mode_sha(&sha, argv, argc, &mode);
 		display_sha(&sha, &mode, argc, argv);
+	}
 	return (0);
 }

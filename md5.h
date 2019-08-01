@@ -20,12 +20,15 @@
 # include <string.h>
 # include <stdint.h>
 # include "libft/libft.h"
+#define CH(e, f, g) (((e) & (f)) ^ (~(e) & (g)))
+#define MA(a, b, c) (((a) & (b)) ^ ((a) & (c)) ^ ((b) & (c)))
 # define ABS(x) ((x < 0) ? (-x) : (x))
 #define ROTL(x, c)	(((x) << (c)) | ((x) >> (32 - (c))))
 #define ROTR(x, n)	(((x) >> (n)) | ((x) << (32 - (n))))
 
 
 typedef struct s_sha256	t_sha256;
+typedef struct s_sha256	t_sha512;
 typedef struct s_md5	t_md5;
 typedef struct s_mode	t_mode;
 
@@ -68,8 +71,8 @@ struct s_md5
 void				init_md5(t_md5 *md5);
 void				digest(t_md5 *md5, unsigned char const *msg, size_t len);
 void				digest_suite(t_md5 *md5, unsigned char *hash, size_t count);
-void				printstr_md5(t_md5 *md5, unsigned const char *msg);
 void				crypt_filesha(t_sha256 *sha, char const *target, t_mode *mode);
+void				printstr_md5(t_md5 *md5, unsigned const char *msg, t_mode *mode);
 /****************************** SHA256 ******************************/
 void				rev_endian32(uint32_t *src, const size_t len);
 void				rev_endian64(uint64_t *src, const size_t len);
@@ -77,7 +80,6 @@ void				init_sha256(t_sha256 *sha);
 void				update(t_sha256 *sha);
 void				digest_sha256(t_sha256 *sha, unsigned char const *msg, size_t len);
 void				digest_sha256_suite(t_sha256 *sha, unsigned char *hash);
-void				print_hash(unsigned char *hash, int count);
-void				printstr_sha256(t_sha256 *sha, unsigned const char *msg);
-// void				crypt_filemd5(t_md5 *md5, char const *target, t_mode *mode);
+void				print_hash(unsigned char *hash, int count, t_mode *mode);
+void				printstr_sha256(t_sha256 *sha, unsigned const char *msg, t_mode *mode);
 #endif
