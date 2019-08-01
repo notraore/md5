@@ -17,7 +17,13 @@ SRCS		= 	main.c \
 				digest.c \
 				utils.c \
 				md5.c \
-				sha256.c
+				sha256.c \
+				display_hash.c \
+				utils.c \
+				check_hashmode.c \
+				crypt_file_and_str.c \
+				printer.c \
+				sha_utils.c \
 
 OBJS		= 	$(patsubst srcs/%.c,objs/%.o,$(SRCS))
 

@@ -12,14 +12,7 @@
 
 #include "md5.h"
 
-// #define CH(e, f, g) (((e) & (f)) ^ (~(e) & (g)))
-// #define MA(a, b, c) (((a) & (b)) ^ ((a) & (c)) ^ ((b) & (c)))
-#define SIGMA0(a) (ROTR(a, 2) ^ ROTR(a, 13) ^ ROTR(a, 22))
-#define SIGMA1(e) (ROTR(e, 6) ^ ROTR(e, 11) ^ ROTR(e, 25))
-#define SIG0(x) (ROTR(x, 7) ^ ROTR(x, 18) ^ (x >> 3))
-#define SIG1(x) (ROTR(x, 17) ^ ROTR(x, 19) ^ (x >> 10))
-
-static uint32_t const k[64] = {
+static const uint32_t	k[64] = {
 	0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b, 0x59f111f1,
 	0x923f82a4, 0xab1c5ed5, 0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
 	0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174, 0xe49b69c1, 0xefbe4786,
@@ -30,89 +23,13 @@ static uint32_t const k[64] = {
 	0xc24b8b70, 0xc76c51a3, 0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
 	0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5, 0x391c0cb3, 0x4ed8aa4a,
 	0x5b9cca4f, 0x682e6ff3, 0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208,
-	0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2 };
+	0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+};
 
-void				rev_endian32(uint32_t *src, const size_t len)
-{
-	unsigned char		*data;
-	uint32_t			n;
-	size_t				i;
-
-	i = 0;
-	while (i < len)
-	{
-		n = src[i];
-		data = (unsigned char *)&src[i++];
-		data[0] = ((n >> 24) & 0xff);
-		data[1] = ((n >> 16) & 0xff);
-		data[2] = ((n >> 8) & 0xff);
-		data[3] = (n & 0xff);
-	}
-}
-
-void				rev_endian64(uint64_t *src, const size_t len)
-{
-	unsigned char		*data;
-	uint64_t			n;
-	size_t				i;
-
-	i = 0;
-	while (i < len)
-	{
-		n = src[i];
-		data = (unsigned char *)&src[i++];
-		data[0] = ((n >> 56) & 0xff);
-		data[1] = ((n >> 48) & 0xff);
-		data[2] = ((n >> 40) & 0xff);
-		data[3] = ((n >> 32) & 0xff);
-		data[4] = ((n >> 24) & 0xff);
-		data[5] = ((n >> 16) & 0xff);
-		data[6] = ((n >> 8) & 0xff);
-		data[7] = (n & 0xff);
-	}
-}
-
-void				init_sha256(t_sha256 *sha)
-{
-	sha->shastate[0] = 0x6a09e667;
-	sha->shastate[1] = 0xbb67ae85;
-	sha->shastate[2] = 0x3c6ef372;
-	sha->shastate[3] = 0xa54ff53a;
-	sha->shastate[4] = 0x510e527f;
-	sha->shastate[5] = 0x9b05688c;
-	sha->shastate[6] = 0x1f83d9ab;
-	sha->shastate[7] = 0x5be0cd19;
-
-	sha->count[0] = 0;
-	sha->count[1] = 0;
-}
-
-static uint32_t			*padding(t_sha256 *sha)
-{
-	static uint32_t state[8];
-	uint32_t		tmp1;
-	uint32_t		tmp2;
-	int				i;
-
-	i = 0;
-	ft_memcpy(state, sha->shastate, sizeof(state));
-	while (i < 64)
-	{
-		tmp1 = state[7] + SIGMA1(state[4]) + CH(state[4], state[5], state[6])
-			+ k[i] + ((uint32_t *)sha->buff)[i];
-		tmp2 = SIGMA0(state[0]) + MA(state[0], state[1], state[2]);
-		state[7] = state[6];
-		state[6] = state[5];
-		state[5] = state[4];
-		state[4] = state[3] + tmp1;
-		state[3] = state[2];
-		state[2] = state[1];
-		state[1] = state[0];
-		state[0] = tmp1 + tmp2;
-		i++;
-	}
-	return (state);
-}
+#define SIGMA0(a) (ROTR(a, 2) ^ ROTR(a, 13) ^ ROTR(a, 22))
+#define SIGMA1(e) (ROTR(e, 6) ^ ROTR(e, 11) ^ ROTR(e, 25))
+#define SIG0(x) (ROTR(x, 7) ^ ROTR(x, 18) ^ (x >> 3))
+#define SIG1(x) (ROTR(x, 17) ^ ROTR(x, 19) ^ (x >> 10))
 
 void		update(t_sha256 *sha)
 {
@@ -139,32 +56,31 @@ void		update(t_sha256 *sha)
 	sha->shastate[6] += pad_rest[6];
 	sha->shastate[7] += pad_rest[7];
 	ft_memset(sha->buff, 0, 64);
-
 }
 
-void			digest_sha256(t_sha256 *sha, unsigned char const *msg, size_t len)
+void		digest_sha256(t_sha256 *s, unsigned char const *msg, size_t len)
 {
 	uint32_t		bits;
 
 	while (len)
 	{
-		bits = sha->count[0] >> 3;
+		bits = s->count[0] >> 3;
 		if (bits + len < 64)
 		{
-			ft_memcpy(sha->buff + bits, msg, len);
-			sha->count[0] += len << 3;
+			ft_memcpy(s->buff + bits, msg, len);
+			s->count[0] += len << 3;
 			return ;
 		}
-		ft_memcpy(sha->buff + bits, msg, 64 - bits);
-		sha->count[0] = 0;
-		++sha->count[1];
-		update(sha);
+		ft_memcpy(s->buff + bits, msg, 64 - bits);
+		s->count[0] = 0;
+		++s->count[1];
+		update(s);
 		msg += 64 - bits;
 		len -= 64 - bits;
 	}
 }
 
-void			digest_sha256_suite(t_sha256 *sha, unsigned char *hash)
+void		digest_sha256_suite(t_sha256 *sha, unsigned char *hash)
 {
 	uint32_t		bits;
 	uint64_t		size;
@@ -185,46 +101,4 @@ void			digest_sha256_suite(t_sha256 *sha, unsigned char *hash)
 		++i;
 	}
 	rev_endian32((uint32_t *)hash, 8);
-}
-
-void			print_hash(unsigned char *hash, int count, t_mode *mode)
-{
-	int						g;
-	size_t					i;
-	const unsigned char		*pc;
-
-	pc = hash;
-	i = 0;
-	while (i < count)
-	{
-		g = (*(pc + i) >> 4) & 0xf;
-		g += g >= 10 ? 'a' - 10 : '0';
-		ft_putchar(g);
-		g = *(pc + i) & 0xf;
-		g += g >= 10 ? 'a' - 10 : '0';
-		ft_putchar(g);
-		i++;
-	}
-	if (!mode->r)
-		ft_putchar('\n');
-}
-
-void			printstr_sha256(t_sha256 *sha, unsigned const char *msg, t_mode *mode)
-{
-	unsigned char hash[32];
-
-	init_sha256(sha);
-	digest_sha256(sha, msg, ft_strlen((char *)msg));
-	digest_sha256_suite(sha, hash);
-	print_hash(hash, 32, mode);
-}
-
-void			printstr_md5(t_md5 *md5, unsigned const char *msg, t_mode *mode)
-{
-	unsigned char hash[32];
-
-	init_md5(md5);
-	digest(md5, msg, ft_strlen((char *)msg));
-	digest_suite(md5, hash, 16);
-	print_hash(hash, 16, mode);
 }

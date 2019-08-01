@@ -20,6 +20,7 @@
 # include <string.h>
 # include <stdint.h>
 # include "libft/libft.h"
+
 #define CH(e, f, g) (((e) & (f)) ^ (~(e) & (g)))
 #define MA(a, b, c) (((a) & (b)) ^ ((a) & (c)) ^ ((b) & (c)))
 # define ABS(x) ((x < 0) ? (-x) : (x))
@@ -28,7 +29,6 @@
 
 
 typedef struct s_sha256	t_sha256;
-typedef struct s_sha256	t_sha512;
 typedef struct s_md5	t_md5;
 typedef struct s_mode	t_mode;
 
@@ -45,13 +45,6 @@ struct				s_mode
 };
 
 struct s_sha256
-{
-	uint32_t		shastate[8];
-	unsigned		count[2];
-	unsigned char	buff[256];
-};
-
-struct s_sha512
 {
 	uint32_t		shastate[8];
 	unsigned		count[2];
