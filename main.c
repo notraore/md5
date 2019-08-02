@@ -21,7 +21,6 @@ int				main(int argc, char **argv)
 	ft_bzero(&md5, sizeof(t_md5));
 	ft_bzero(&mode, sizeof(t_mode));
 	ft_bzero(&sha, sizeof(t_sha256));
-
 	if (!isatty(fileno(stdin)))
 		mode.pipe = true;
 	check_argc(argc, &mode);

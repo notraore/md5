@@ -12,9 +12,8 @@
 
 #include "md5.h"
 
-static uint32_t const	k[64] = {
-	0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee,
-	0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
+static uint32_t const		g_k[64] = {0xd76aa478, 0xe8c7b756, 0x242070db,
+	0xc1bdceee, 0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
 	0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be,
 	0x6b901122, 0xfd987193, 0xa679438e, 0x49b40821,
 	0xf61e2562, 0xc040b340, 0x265e5a51, 0xe9b6c7aa,
@@ -35,21 +34,20 @@ static uint32_t const	k[64] = {
 #define S3			4, 11, 16, 23
 #define S4			6, 10, 15, 21
 
-static uint32_t const	g[64] = {
+static uint32_t const		g_g[64] = {
 	S1, S1, S1, S1,
 	S2, S2, S2, S2,
 	S3, S3, S3, S3,
 	S4, S4, S4, S4
 };
 
-static int s[64] = {
+static int g_s[64] = {
 	0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
 	1, 6, 11, 0, 5, 10, 15, 4, 9, 14, 3, 8, 13, 2, 7, 12,
 	5, 8, 11, 14, 1, 4, 7, 10, 13, 0, 3, 6, 9, 12, 15, 2,
 	0, 7, 14, 5, 12, 3, 10, 1, 8, 15, 6, 13, 4, 11, 2, 9};
 
-
-void			init_md5(t_md5 *md5)
+void				init_md5(t_md5 *md5)
 {
 	md5->mdstate[0] = 0x67452301;
 	md5->mdstate[1] = 0xefcdab89;
@@ -59,14 +57,12 @@ void			init_md5(t_md5 *md5)
 	md5->count[1] = 0;
 }
 
-
 #define F1(b, c, d)	(((b) & (c)) | (~(b) & (d)))
 #define F2(b, c, d)	(((b) & (d)) | ((c) & ~(d)))
 #define F3(b, c, d)	((b) ^ (c) ^ (d))
 #define F4(b, c, d)	((c) ^ ((b) | ~(d)))
 
-
-static uint32_t			*padding(t_md5 *md5)
+static uint32_t		*padding(t_md5 *md5)
 {
 	static uint32_t	state[4];
 	uint32_t		f;
@@ -84,7 +80,7 @@ static uint32_t			*padding(t_md5 *md5)
 			f = F3(state[1], state[2], state[3]);
 		else
 			f = F4(state[1], state[2], state[3]);
-		f += state[0] + k[i] + ((uint32_t *)md5->buff)[s[i]];
+		f += state[0] + g_k[i] + ((uint32_t *)md5->buff)[s[i]];
 		state[0] = state[3];
 		state[3] = state[2];
 		state[2] = state[1];
@@ -94,7 +90,7 @@ static uint32_t			*padding(t_md5 *md5)
 	return (state);
 }
 
-static void				update_md5(t_md5 *md5)
+static void			update_md5(t_md5 *md5)
 {
 	uint32_t	*chunk_res;
 
@@ -106,7 +102,7 @@ static void				update_md5(t_md5 *md5)
 	ft_memset(md5->buff, 0, 64);
 }
 
-void					digest(t_md5 *md5, unsigned char const *msg, size_t len)
+void				digest(t_md5 *md5, unsigned char const *msg, size_t len)
 {
 	uint32_t	bytes;
 
@@ -128,7 +124,7 @@ void					digest(t_md5 *md5, unsigned char const *msg, size_t len)
 	}
 }
 
-void					digest_suite(t_md5 *md5, unsigned char *hash, size_t count)
+void				digest_suite(t_md5 *md5, unsigned char *hash, size_t count)
 {
 	uint32_t	bytes;
 	uint64_t	total_size;
@@ -149,4 +145,3 @@ void					digest_suite(t_md5 *md5, unsigned char *hash, size_t count)
 		++i;
 	}
 }
-
