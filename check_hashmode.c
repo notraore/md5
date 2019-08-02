@@ -10,6 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "md5.h"
+
 void			check_mode_md5(t_md5 *md5, char **line, char argc, t_mode *mode)
 {
 	int i;

@@ -34,12 +34,12 @@ void			print_hash(unsigned char *hash, int count, t_mode *mode)
 		ft_putchar('\n');
 }
 
-void			printstr_sha256(t_sha256 *s, unsigned const char *m, t_mode *m)
+void			printstr_sha256(t_sha256 *s, unsigned const char *ms, t_mode *m)
 {
 	unsigned char hash[32];
 
 	init_sha256(s);
-	digest_sha256(s, m, ft_strlen((char *)m));
+	digest_sha256(s, ms, ft_strlen((char *)ms));
 	digest_sha256_suite(s, hash);
 	print_hash(hash, 32, m);
 }

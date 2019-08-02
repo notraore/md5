@@ -68,16 +68,24 @@ void		normal_md5(t_md5 *md5, t_mode *mode, char *argv);
 void		display_md5(t_md5 *md5, t_mode *mode, int argc, char **argv);
 void		display_sha(t_sha256 *sha, t_mode *mode, int argc, char **argv);
 void		print_hash(unsigned char *hash, int count, t_mode *mode);
-void		printstr_sha256(t_sha256 *s, unsigned const char *m, t_mode *m);
+void		printstr_sha256(t_sha256 *s, unsigned const char *ms, t_mode *m);
 void		printstr_md5(t_md5 *md5, unsigned const char *msg, t_mode *mode);
 void		update(t_sha256 *sha);
-void		digest_sha256(t_sha256 *s, unsigned char const *msg, size_t len);
+void		digest_sha256(t_sha256 *s, unsigned char const *m, size_t len);
 void		digest_sha256_suite(t_sha256 *sha, unsigned char *hash);
+void		digest(t_md5 *md5, unsigned char const *msg, size_t len);
 void		rev_endian32(uint32_t *src, const size_t len);
 void		rev_endian64(uint64_t *src, const size_t len);
 void		init_sha256(t_sha256 *sha);
 void		print_help(void);
+void		init_md5(t_md5 *md5);
 void		check_hashmethod(char *args, t_mode *mode);
 void		check_argc(int argc, t_mode *mode);
+void		print_cript(t_md5 *md5, char const *target, t_mode *mode);
+void		crypt_filemd5(t_md5 *md5, char const *target, t_mode *mode);
+void		sha_print_cript(t_sha256 *sha, char const *target, t_mode *mode);
+void		crypt_filesha(t_sha256 *sha, char const *target, t_mode *mode);
+void		digest_suite(t_md5 *md5, unsigned char *hash, size_t count);
+void		update_md5(t_md5 *md5);
 
 #endif

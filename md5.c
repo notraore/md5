@@ -80,17 +80,17 @@ static uint32_t		*padding(t_md5 *md5)
 			f = F3(state[1], state[2], state[3]);
 		else
 			f = F4(state[1], state[2], state[3]);
-		f += state[0] + g_k[i] + ((uint32_t *)md5->buff)[s[i]];
+		f += state[0] + g_k[i] + ((uint32_t *)md5->buff)[g_s[i]];
 		state[0] = state[3];
 		state[3] = state[2];
 		state[2] = state[1];
-		state[1] += ROTL(f, g[i]);
+		state[1] += ROTL(f, g_g[i]);
 		++i;
 	}
 	return (state);
 }
 
-static void			update_md5(t_md5 *md5)
+void				update_md5(t_md5 *md5)
 {
 	uint32_t	*chunk_res;
 

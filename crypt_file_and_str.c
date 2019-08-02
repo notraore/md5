@@ -10,6 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "md5.h"
+
 void			print_cript(t_md5 *md5, char const *target, t_mode *mode)
 {
 	if (target && !mode->r && !mode->q)
