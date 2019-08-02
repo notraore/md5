@@ -12,11 +12,6 @@
 
 #include "md5.h"
 
-#define SIGMA0(a) (ROTR(a, 2) ^ ROTR(a, 13) ^ ROTR(a, 22))
-#define SIGMA1(e) (ROTR(e, 6) ^ ROTR(e, 11) ^ ROTR(e, 25))
-#define SIG0(x) (ROTR(x, 7) ^ ROTR(x, 18) ^ (x >> 3))
-#define SIG1(x) (ROTR(x, 17) ^ ROTR(x, 19) ^ (x >> 10))
-
 void		update(t_sha256 *sha)
 {
 	uint32_t		*pad_rest;

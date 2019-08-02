@@ -11,12 +11,6 @@
 /* ************************************************************************** */
 
 #ifndef MD5_H
-# define MD5_H
-# define CH(e, f, g) (((e) & (f)) ^ (~(e) & (g)))
-# define MA(a, b, c) (((a) & (b)) ^ ((a) & (c)) ^ ((b) & (c)))
-# define ABS(x) ((x < 0) ? (-x) : (x))
-# define ROTL(x, c)	(((x) << (c)) | ((x) >> (32 - (c))))
-# define ROTR(x, n)	(((x) >> (n)) | ((x) << (32 - (n))))
 # include <unistd.h>
 # include <stdlib.h>
 # include <fcntl.h>
@@ -25,6 +19,17 @@
 # include <string.h>
 # include <stdint.h>
 # include "libft/libft.h"
+
+# define MD5_H
+# define CH(e, f, g) (((e) & (f)) ^ (~(e) & (g)))
+# define MA(a, b, c) (((a) & (b)) ^ ((a) & (c)) ^ ((b) & (c)))
+# define ABS(x) ((x < 0) ? (-x) : (x))
+# define ROTL(x, c)	(((x) << (c)) | ((x) >> (32 - (c))))
+# define ROTR(x, n)	(((x) >> (n)) | ((x) << (32 - (n))))
+# define SIGMA0(a) (ROTR(a, 2) ^ ROTR(a, 13) ^ ROTR(a, 22))
+# define SIGMA1(e) (ROTR(e, 6) ^ ROTR(e, 11) ^ ROTR(e, 25))
+# define SIG0(x) (ROTR(x, 7) ^ ROTR(x, 18) ^ (x >> 3))
+# define SIG1(x) (ROTR(x, 17) ^ ROTR(x, 19) ^ (x >> 10))
 
 typedef struct s_sha256	t_sha256;
 typedef struct s_md5	t_md5;
@@ -62,5 +67,17 @@ void		normal_sha(t_sha256 *sha, t_mode *mode, char *argv);
 void		normal_md5(t_md5 *md5, t_mode *mode, char *argv);
 void		display_md5(t_md5 *md5, t_mode *mode, int argc, char **argv);
 void		display_sha(t_sha256 *sha, t_mode *mode, int argc, char **argv);
+void		print_hash(unsigned char *hash, int count, t_mode *mode);
+void		printstr_sha256(t_sha256 *s, unsigned const char *m, t_mode *m);
+void		printstr_md5(t_md5 *md5, unsigned const char *msg, t_mode *mode);
+void		update(t_sha256 *sha);
+void		digest_sha256(t_sha256 *s, unsigned char const *msg, size_t len);
+void		digest_sha256_suite(t_sha256 *sha, unsigned char *hash);
+void		rev_endian32(uint32_t *src, const size_t len);
+void		rev_endian64(uint64_t *src, const size_t len);
+void		init_sha256(t_sha256 *sha);
+void		print_help(void);
+void		check_hashmethod(char *args, t_mode *mode);
+void		check_argc(int argc, t_mode *mode);
 
 #endif

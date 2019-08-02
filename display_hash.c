@@ -10,6 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "md5.h"
+
 void			normal_sha(t_sha256 *sha, t_mode *mode, char *argv)
 {
 	if (!mode->q)

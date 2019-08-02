@@ -10,6 +10,8 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "md5.h"
+
 void			print_hash(unsigned char *hash, int count, t_mode *mode)
 {
 	int						g;

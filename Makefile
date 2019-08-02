@@ -14,7 +14,6 @@ NAME		= 	ft_ssl
 LIBFT 		= 	libft/libft.a
 
 SRCS		= 	main.c \
-				digest.c \
 				utils.c \
 				md5.c \
 				sha256.c \
