@@ -38,7 +38,7 @@ all:		$(NAME)
 $(NAME):	$(OBJS)
 			@ make -C ./libft all
 			@ $(CC) $(LIBFT) $(CFLAGS) -o $@ $^
-			@ echo "\n\033[92m---> hash program created ✓\033[0m";
+			@ echo "\n\033[92m---> ft_ssl program created ✓\033[0m";
 
 objs/%.o:	srcs/%.c
 			@ mkdir -p objs
